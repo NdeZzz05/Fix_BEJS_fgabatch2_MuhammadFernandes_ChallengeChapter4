@@ -12,19 +12,16 @@ const TRANSACTION_MODELS = {
   },
 
   getDetailTransaction: async (id) => {
-    try {
-      const result = await prisma.transactions.findUnique({
-        where: { id },
-        include: {
-          sourceAccount: true,
-          destinationAccount: true,
-        },
-      });
+    const result = await prisma.transactions.findUnique({
+      where: { id },
+      include: {
+        transaction_type: true,
+        sourceAccount: true,
+        destinationAccount: true,
+      },
+    });
 
-      return result;
-    } catch (error) {
-      return error;
-    }
+    return result;
   },
 
   createTransfer: async (data) => {
