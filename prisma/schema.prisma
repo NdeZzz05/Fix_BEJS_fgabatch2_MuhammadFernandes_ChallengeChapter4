@@ -67,7 +67,7 @@ model Transactions{
   id                    String   @id @default(uuid())
   amount                Float
   date                  DateTime @default(now())              
-  transaction_type_id   String @unique
+  transaction_type_id   String
   transaction_type      Transaction_Type @relation(fields: [transaction_type_id], references: [id])
   source_account_id     String?
   sourceAccount         Bank_Accounts? @relation("sourceAccount", fields: [source_account_id], references: [id])

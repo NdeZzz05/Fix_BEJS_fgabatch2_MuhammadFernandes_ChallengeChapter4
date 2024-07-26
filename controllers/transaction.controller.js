@@ -43,8 +43,6 @@ createTransfer = async (req, res, next) => {
       transaction_type_id,
     });
 
-    console.log(result);
-
     res.status(201).json({
       success: true,
       message: "Transaction created successfully",
