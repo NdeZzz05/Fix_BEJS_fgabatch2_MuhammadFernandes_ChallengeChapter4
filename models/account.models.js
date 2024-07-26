@@ -1,40 +1,61 @@
 const prisma = require("../config/prisma");
+const generateAccountNumber = require("../utils/generate_account_number");
 
 const ACCOUNT_MODELS = {
-  getAllAccounts: async () => {
-    try {
-      const result = await prisma.bank_Accounts
-        .findMany
-        //     {
-        //     include: {
-        //       user: true,
-        //       transactions_source: true,
-        //       transactions_target: true,
-        //     },
-        //   }
-        ();
-      return result;
-    } catch (error) {
-      throw new Error("Failed to fetch accounts");
-    }
+  getAllAccount: async () => {
+    const result = await prisma.bank_Accounts.findMany({
+      select: {
+        id: true,
+        bank_name: true,
+        bank_account_number: true,
+        balance: true,
+        user_id: true,
+      },
+    });
+    return result;
+  },
+
+  getDetailAccount: async (id) => {
+    const result = await prisma.bank_Accounts.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        bank_name: true,
+        bank_account_number: true,
+        balance: true,
+        user_id: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        transactions_source: true,
+        transactions_target: true,
+      },
+    });
+    return result;
   },
 
   createAccount: async (data) => {
-    const { bank_name, bank_account_number, balance, user_id } = data;
+    const { bank_name, pin, balance, user_id } = data;
 
-    console.log(bank_name, bank_account_number, balance, user_id);
+    const newAccountNumber = await generateAccountNumber();
+
     try {
       const result = await prisma.bank_Accounts.create({
         data: {
           bank_name,
-          bank_account_number,
+          bank_account_number: newAccountNumber,
+          pin,
           balance,
           user_id,
         },
       });
       return result;
     } catch (error) {
-      throw new Error("Failed to create account");
+      return error;
     }
   },
 };

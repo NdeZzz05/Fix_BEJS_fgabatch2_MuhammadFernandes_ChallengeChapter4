@@ -1,9 +1,10 @@
 var express = require("express");
 var router = express.Router();
 
-const ACCOUNT_CONTROLLER = require("../../../../controllers/bank_account.controller");
+const ACCOUNT_CONTROLLER = require("../../../../controllers/account.controller");
 
 router.get("/", ACCOUNT_CONTROLLER.getAllAccount);
+router.get("/:id", ACCOUNT_CONTROLLER.getDetailAccount);
 router.post("/", ACCOUNT_CONTROLLER.createAccount);
 
 module.exports = router;

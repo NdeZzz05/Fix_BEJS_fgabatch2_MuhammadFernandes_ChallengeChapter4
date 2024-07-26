@@ -1,12 +1,10 @@
-const { BadRequest, NotFoundError } = require("../errors/customsErrors");
-const USER_MODELS = require("../models/user.models");
+const USER_SERVICES = require("../services/user.services");
 
-getUser = async (req, res, next) => {
+getAllUser = async (req, res, next) => {
   try {
-    const result = await USER_MODELS.getUser();
+    const result = await USER_SERVICES.getAllUser();
     res.status(200).json({
       success: true,
-      statusCode: 200,
       message: "Users fetched successfully",
       data: result,
     });
@@ -18,11 +16,9 @@ getUser = async (req, res, next) => {
 getDetailUser = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const result = await USER_MODELS.getDetailUser(id);
-    if (!result) throw new NotFoundError("User tidak ditemukan");
+    const result = await USER_SERVICES.getDetailUser(id);
     res.status(200).json({
       success: true,
-      statusCode: 200,
       message: "User found successfully",
       data: result,
     });
@@ -34,12 +30,9 @@ getDetailUser = async (req, res, next) => {
 createUser = async (req, res, next) => {
   try {
     let data = req.body;
-    if (!data.name || !data.email) throw new BadRequest("Tolong isi semua kolom");
-    // if (!data.email) throw new BadRequest("Email tidak boleh kosong");
-    const result = await USER_MODELS.createUser(data);
+    const result = await USER_SERVICES.createUser(data);
     res.status(201).json({
       success: true,
-      statusCode: 201,
       message: "User created successfully",
       data: result,
     });
@@ -48,4 +41,32 @@ createUser = async (req, res, next) => {
   }
 };
 
-module.exports = { getUser, getDetailUser, createUser };
+updateUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    let data = req.body;
+    const result = await USER_SERVICES.updateUser(id, data);
+    res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+deleteUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = await USER_SERVICES.deleteUser(id);
+    res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { getAllUser, getDetailUser, createUser, updateUser, deleteUser };

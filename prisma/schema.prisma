@@ -13,70 +13,77 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id    String  @id @default(cuid())
-  name  String?
-  email String  @unique
-  posts Post[]
-  profile Profile?
+model Users {
+  id       String   @id @default(uuid())
+  name     String
+  email    String   @unique
+  password String
+  profile Profiles? 
   bank_accounts Bank_Accounts[]
 }
 
-model Post {
-  id       String @id @default(cuid())
-  title    String
-  content  String
-  authorId String
-  author   User   @relation(fields: [authorId], references: [id])
+model Profiles {
+  id              String   @id @default(uuid())
+  identity_type   IdentityType
+  identity_number String @unique
+  user_id         String @unique
+  user            Users   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  address_id      String?
+  address         Addresses? @relation(fields: [address_id], references: [id])
+  job_id          String?
+  job             Jobs?      @relation(fields: [job_id], references: [id])
 }
 
-model Profile{
-  id       String  @id @default(cuid())
-  identity_type String
-  identity_number String
-  address String
-  user   User   @relation(fields: [user_id], references: [id])
-  user_id String @unique
+model Addresses {
+  id          String   @id @default(uuid())
+  street      String
+  city        String
+  state       String
+  postal_code String
+  country     String
+  profile     Profiles[]
 }
 
-// model Bank_Accounts {
-//   id                   String         @id @default(cuid())
-//   bank_name            String
-//   bank_account_number  String
-//   balance              Float
-//   user_id              String
-//   user                 User           @relation(fields: [user_id], references: [id])
-//   transactions_source  Transactions[] @relation("sourceAccount")
-//   transactions_target  Transactions[] @relation("targetAccount")
-// }
+model Jobs{
+  id            String   @id @default(uuid())
+  company_name  String
+  position      String
+  profile       Profiles[]
+}
 
-model Bank_Accounts {
-  id                    String         @id @default(cuid())
+model Bank_Accounts{
+  id                    String   @id @default(uuid())
   bank_name             String
-  bank_account_number   String         //harusnya unique
+  bank_account_number   String @unique
+  pin                   String
   balance               Float
-  user_id               String
-  user                  User           @relation(fields: [user_id], references: [id])
+  user_id               String @unique
+  user                  Users   @relation(fields: [user_id], references: [id])
   transactions_source   Transactions[] @relation("sourceAccount")
   transactions_target   Transactions[] @relation("targetAccount")
 }
 
-// model Transactions {
-//   id                    String         @id @default(uuid())
-//   amount                Float
-//   source_account_id     String?
-//   sourceAccount         Bank_Accounts? @relation("sourceAccount", fields: [source_account_id], references: [id])
-//   destination_account_id String?
-//   destinationAccount    Bank_Accounts? @relation("targetAccount", fields: [destination_account_id], references: [id])
-// }
-
-
-
-model Transactions {
-  id                    String         @id @default(uuid())
+model Transactions{
+  id                    String   @id @default(uuid())
   amount                Float
+  date                  DateTime @default(now())              
+  transaction_type_id   String @unique
+  transaction_type      Transaction_Type @relation(fields: [transaction_type_id], references: [id])
   source_account_id     String?
   sourceAccount         Bank_Accounts? @relation("sourceAccount", fields: [source_account_id], references: [id])
   destination_account_id String?
   destinationAccount    Bank_Accounts? @relation("targetAccount", fields: [destination_account_id], references: [id])
+}
+
+model Transaction_Type{
+  id   String   @id @default(uuid())
+  name String
+  transaction Transactions[]
+}
+
+enum IdentityType {
+  KTP
+  SIM
+  PASSPORT
+  STUDENT_CARD
 }

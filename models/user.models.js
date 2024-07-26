@@ -1,9 +1,16 @@
 const prisma = require("../config/prisma");
 
 const USER_MODELS = {
-  getUser: async () => {
+  getAllUser: async () => {
     try {
-      const result = await prisma.user.findMany();
+      const result = await prisma.users.findMany({
+        // tanpa data password
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      });
       return result;
     } catch (error) {
       return error;
@@ -11,38 +18,117 @@ const USER_MODELS = {
   },
 
   getDetailUser: async (id) => {
-    try {
-      const result = await prisma.user.findUnique({
-        where: { id },
-        include: { profile: true },
-      });
-      return result;
-    } catch (error) {
-      return error;
-    }
+    const result = await prisma.users.findUnique({
+      where: { id },
+      include: {
+        profile: {
+          include: {
+            address: true,
+            job: true,
+          },
+        },
+      },
+    });
+    return result;
   },
 
   createUser: async (data) => {
-    const { name, email, identity_type, identity_number, address } = data;
-    try {
-      const result = await prisma.user.create({
-        data: {
-          name,
-          email,
-          profile: {
-            create: {
-              identity_type,
-              identity_number,
-              address,
+    const { name, email, password, identity_type, identity_number, street, city, state, postal_code, country, company_name, position } = data;
+
+    const result = await prisma.users.create({
+      data: {
+        name,
+        email,
+        password,
+        profile: {
+          create: {
+            identity_type,
+            identity_number,
+            address: {
+              create: {
+                street,
+                city,
+                state,
+                postal_code,
+                country,
+              },
+            },
+            job: {
+              create: {
+                company_name,
+                position,
+              },
             },
           },
         },
-        include: { profile: true },
-      });
-      return result;
-    } catch (error) {
-      return error;
-    }
+      },
+      include: {
+        profile: {
+          include: {
+            address: true,
+            job: true,
+          },
+        },
+      },
+    });
+    return result;
+  },
+
+  updateUser: async (id, data) => {
+    const { name, email, password, identity_type, identity_number, street, city, state, postal_code, country, company_name, position } = data;
+    const result = await prisma.users.update({
+      where: { id },
+      data: {
+        name,
+        email,
+        password,
+        profile: {
+          update: {
+            identity_type,
+            identity_number,
+            address: {
+              update: {
+                street,
+                city,
+                state,
+                postal_code,
+                country,
+              },
+            },
+            job: {
+              update: {
+                company_name,
+                position,
+              },
+            },
+          },
+        },
+      },
+      include: {
+        profile: {
+          include: {
+            address: true,
+            job: true,
+          },
+        },
+      },
+    });
+    return result;
+  },
+
+  deleteUser: async (id) => {
+    const result = await prisma.users.delete({
+      where: { id },
+      include: {
+        profile: {
+          include: {
+            address: true,
+            job: true,
+          },
+        },
+      },
+    });
+    return result;
   },
 };
 

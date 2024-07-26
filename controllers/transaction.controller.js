@@ -1,12 +1,11 @@
 const { BadRequest, NotFoundError } = require("../errors/customsErrors");
 const TRANSACTION_MODELS = require("../models/transaction.models");
 
-getAllTransactions = async (req, res, next) => {
+getAllTransaction = async (req, res, next) => {
   try {
-    const result = await TRANSACTION_MODELS.getAllTransactions();
+    const result = await TRANSACTION_MODELS.getAllTransaction();
     res.status(200).json({
       success: true,
-      statusCode: 200,
       message: "Transactions fetched successfully",
       data: result,
     });
@@ -15,13 +14,15 @@ getAllTransactions = async (req, res, next) => {
   }
 };
 
-getDetailTransactions = async (req, res, next) => {
+getDetailTransaction = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const result = await TRANSACTION_MODELS.getTransactionById(id);
+    const result = await TRANSACTION_MODELS.getDetailTransaction(id);
+
+    if (!result) throw new NotFoundError("Transaction not found");
+
     res.status(200).json({
       success: true,
-      statusCode: 200,
       message: "Detail transactions fetched successfully",
       data: result,
     });
@@ -30,22 +31,24 @@ getDetailTransactions = async (req, res, next) => {
   }
 };
 
-createTransaction = async (req, res, next) => {
+createTransfer = async (req, res, next) => {
   try {
-    const { amount, source_account_id, destination_account_id } = req.body;
-    // if (!amount || !source_account_id || !destination_account_id) {
-    //   throw new BadRequest("Missing required fields");
-    // }
+    const { amount, source_account_id, destination_account_id, transaction_type_id } = req.body;
+    if (!amount || !source_account_id || !destination_account_id) {
+      throw new BadRequest("Missing required fields");
+    }
 
-    const result = await TRANSACTION_MODELS.createTransaction({
+    const result = await TRANSACTION_MODELS.createTransfer({
       amount,
       source_account_id,
       destination_account_id,
+      transaction_type_id,
     });
+
+    console.log(result);
 
     res.status(201).json({
       success: true,
-      statusCode: 201,
       message: "Transaction created successfully",
       data: result,
     });
@@ -54,18 +57,17 @@ createTransaction = async (req, res, next) => {
   }
 };
 
-createCashDeposit = async (req, res, next) => {
+createDeposit = async (req, res, next) => {
   try {
-    const { amount, destination_account_id } = req.body;
+    const { amount, destination_account_id, transaction_type_id } = req.body;
     if (!amount || !destination_account_id) {
       throw new BadRequest("Missing required fields");
     }
 
-    const result = await TRANSACTION_MODELS.createCashDeposit(amount, destination_account_id);
+    const result = await TRANSACTION_MODELS.createDeposit(amount, destination_account_id, transaction_type_id);
 
     res.status(201).json({
       success: true,
-      statusCode: 201,
       message: "Cash deposit created successfully",
       data: result,
     });
@@ -74,4 +76,20 @@ createCashDeposit = async (req, res, next) => {
   }
 };
 
-module.exports = { getAllTransactions, getDetailTransactions, createTransaction, createCashDeposit };
+createWithdraw = async (req, res, next) => {
+  try {
+    const { amount, source_account_id, transaction_type_id } = req.body;
+
+    const result = await TRANSACTION_MODELS.createWithdraw(amount, source_account_id, transaction_type_id);
+
+    res.status(201).json({
+      success: true,
+      message: "Cash withdrawal created successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { getAllTransaction, getDetailTransaction, createTransfer, createDeposit, createWithdraw };
