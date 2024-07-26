@@ -1,4 +1,3 @@
-const ACCOUNT_MODELS = require("../models/account.models");
 const ACCOUNT_SERVICES = require("../services/account.services");
 
 getAllAccount = async (req, res, next) => {
@@ -32,18 +31,9 @@ getDetailAccount = async (req, res, next) => {
 
 createAccount = async (req, res, next) => {
   try {
-    const { bank_name, pin, balance, user_id } = req.body;
-    if (!bank_name || !pin || balance === undefined || !user_id) {
-      throw new BadRequest("Missing required fields");
-    }
+    const data = req.body;
 
-    console.log(bank_name, pin, balance, user_id);
-    const result = await ACCOUNT_MODELS.createAccount({
-      bank_name,
-      pin,
-      balance,
-      user_id,
-    });
+    const result = await ACCOUNT_SERVICES.createAccount(data);
 
     res.status(201).json({
       success: true,
@@ -55,4 +45,36 @@ createAccount = async (req, res, next) => {
   }
 };
 
-module.exports = { getAllAccount, getDetailAccount, createAccount };
+updateAccount = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const data = req.body;
+
+    const result = await ACCOUNT_SERVICES.updateAccount(id, data);
+
+    res.status(200).json({
+      success: true,
+      message: "Account updated successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+deleteAccount = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const result = await ACCOUNT_SERVICES.deleteAccount(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Account deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { getAllAccount, getDetailAccount, createAccount, updateAccount, deleteAccount };

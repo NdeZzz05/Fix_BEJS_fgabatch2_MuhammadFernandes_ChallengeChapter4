@@ -43,20 +43,34 @@ const ACCOUNT_MODELS = {
 
     const newAccountNumber = await generateAccountNumber();
 
-    try {
-      const result = await prisma.bank_Accounts.create({
-        data: {
-          bank_name,
-          bank_account_number: newAccountNumber,
-          pin,
-          balance,
-          user_id,
-        },
-      });
-      return result;
-    } catch (error) {
-      return error;
-    }
+    const result = await prisma.bank_Accounts.create({
+      data: {
+        bank_name,
+        bank_account_number: newAccountNumber,
+        pin,
+        balance,
+        user_id,
+      },
+    });
+    return result;
+  },
+
+  updateAccount: async (id, data) => {
+    const { bank_name, pin } = data;
+
+    const result = await prisma.bank_Accounts.update({
+      where: { id },
+      data: {
+        bank_name,
+        pin,
+      },
+    });
+    return result;
+  },
+
+  deleteAccount: async (id) => {
+    const result = await prisma.bank_Accounts.delete({ where: { id } });
+    return result;
   },
 };
 

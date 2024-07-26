@@ -1,9 +1,10 @@
 const { BadRequest, NotFoundError } = require("../errors/customsErrors");
 const TRANSACTION_MODELS = require("../models/transaction.models");
+const TRANSACTION_SERVICES = require("../services/transaction.services");
 
 getAllTransaction = async (req, res, next) => {
   try {
-    const result = await TRANSACTION_MODELS.getAllTransaction();
+    const result = await TRANSACTION_SERVICES.getAllTransaction();
     res.status(200).json({
       success: true,
       message: "Transactions fetched successfully",
@@ -17,10 +18,7 @@ getAllTransaction = async (req, res, next) => {
 getDetailTransaction = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const result = await TRANSACTION_MODELS.getDetailTransaction(id);
-
-    if (!result) throw new NotFoundError("Transaction not found");
-
+    const result = await TRANSACTION_SERVICES.getDetailTransaction(id);
     res.status(200).json({
       success: true,
       message: "Detail transactions fetched successfully",
